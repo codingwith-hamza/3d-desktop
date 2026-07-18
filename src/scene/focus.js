@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const _euler = new THREE.Euler();
 
 // where a window sits when maximized: covering its own wall face, leaving a
-// thin gap so the neon corner seams still show between walls (reference look)
+// thin gap so the glowing corner seams still show between walls
 function wallTarget(def, m) {
   const { W, H, depth } = m;
   const gap = 14;
@@ -22,19 +22,23 @@ function wallTarget(def, m) {
   }
 }
 
-// Maximize/restore: the green traffic light (or double-clicking the titlebar)
-// grows a window to cover its own wall face — flat against the wall, other
-// windows untouched, so any combination (including all five) can be maximized
-// and the box interior becomes pure app surface. Esc restores everything.
+// Window manager for the wall screens:
+// - green light / titlebar double-click → maximize onto the wall (or float back)
+// - red light → close: the screen fades out and the wall goes bare
+// - the dock reopens closed apps (opening one closes its wall-mate)
+// - Esc floats every maximized window
 export function createFocus(panels, m) {
   const state = new Map();
+  let changed = null;
 
   snapshotHomes();
 
   for (const p of panels) {
     const el = p.obj.element;
-    el.querySelector('.traffic .g').addEventListener('click', () => toggle(p));
-    el.querySelector('.panel-titlebar').addEventListener('dblclick', () => toggle(p));
+    el.querySelector('.traffic .g').addEventListener('click', () => toggleMax(p));
+    el.querySelector('.traffic .r').addEventListener('click', () => setOpen(p, false));
+    el.querySelector('.panel-titlebar').addEventListener('dblclick', () => toggleMax(p));
+    if (p.def.closed) el.classList.add('off');
   }
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -56,6 +60,7 @@ export function createFocus(panels, m) {
         cur: prev?.cur ?? 0,
         target: prev?.target ?? 0,
         sized: prev?.sized ?? false,
+        closed: prev?.closed ?? !!p.def.closed,
       });
     }
   }
@@ -87,7 +92,7 @@ export function createFocus(panels, m) {
     st.cur = 0;
   }
 
-  function toggle(p) {
+  function toggleMax(p) {
     const st = state.get(p);
     if (st.target === 1) {
       st.target = 0;
@@ -97,10 +102,28 @@ export function createFocus(panels, m) {
     }
   }
 
+  function setOpen(p, open) {
+    const st = state.get(p);
+    if (open) {
+      // one screen per wall: opening evicts the current occupant
+      for (const q of panels) {
+        if (q !== p && q.def.wall === p.def.wall && !state.get(q).closed) setOpen(q, false);
+      }
+      st.closed = false;
+      p.obj.element.classList.remove('off');
+    } else {
+      st.closed = true;
+      p.obj.element.classList.add('off');
+    }
+    changed?.();
+  }
+
   return {
     maximizeAll() {
       for (const p of panels) {
-        state.get(p).target = 1;
+        const st = state.get(p);
+        if (st.closed) continue;
+        st.target = 1;
         sizeUp(p);
       }
     },
@@ -135,6 +158,32 @@ export function createFocus(panels, m) {
         st.sized = false;
         sizeUp(p);
       }
+    },
+
+    // ---- dock API ----
+    apps() {
+      return panels.map((p) => ({
+        id: p.def.app.id,
+        title: p.def.app.title,
+        open: !state.get(p).closed,
+      }));
+    },
+
+    toggleApp(id) {
+      const p = panels.find((q) => q.def.app.id === id);
+      if (!p) return;
+      const st = state.get(p);
+      if (st.closed) {
+        setOpen(p, true);
+        st.target = 1; // reopened screens land maximized, matching the room's default look
+        sizeUp(p);
+      } else {
+        setOpen(p, false);
+      }
+    },
+
+    onChange(fn) {
+      changed = fn;
     },
   };
 }

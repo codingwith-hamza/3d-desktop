@@ -1,22 +1,30 @@
 import * as THREE from 'three';
 
+// Sunset Studio palette: the room reads as golden-hour light — coral high,
+// amber low, peach underfoot, warm cream haze in the distance.
 const C = {
-  bg: 0x05060a,
-  wall: 0x0b0e17,
-  back: 0x080b13,
-  floor: 0x120d22,
-  ceiling: 0x090c14,
-  edge: 0x4cc9f0,
-  grid: 0x1c2742,
-  dust: 0x6fb8d9,
+  haze: 0xfff3e4,
+  coral: 0xff6f61,
+  amber: 0xffbf69,
+  floorFar: 0xffb967,
+  floorNear: 0xffd9a6,
+  ceilNear: 0xffdfc2,
+  ceilFar: 0xff8a6e,
+  seam: 0xffe9be,
+  grid: 0xe8a96b,
+  dust: 0xfff1cf,
 };
 
-function wall(w, h, color) {
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(w, h),
-    new THREE.MeshBasicMaterial({ color })
+// plane with a vertical vertex-color gradient (top → bottom in local space)
+function gradWall(w, h, topColor, bottomColor) {
+  const geo = new THREE.PlaneGeometry(w, h);
+  const t = new THREE.Color(topColor);
+  const b = new THREE.Color(bottomColor);
+  geo.setAttribute(
+    'color',
+    new THREE.Float32BufferAttribute([t.r, t.g, t.b, t.r, t.g, t.b, b.r, b.g, b.b, b.r, b.g, b.b], 3)
   );
-  return mesh;
+  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true }));
 }
 
 // grid lines drawn flat on the floor plane (before rotation: XY plane)
@@ -32,7 +40,7 @@ function makeGrid(w, d, step) {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
   return new THREE.LineSegments(
     geo,
-    new THREE.LineBasicMaterial({ color: C.grid, transparent: true, opacity: 0.55 })
+    new THREE.LineBasicMaterial({ color: C.grid, transparent: true, opacity: 0.3 })
   );
 }
 
@@ -45,33 +53,36 @@ export function buildRoom(scene, m) {
   const L = front + depth;
   const cz = (front - depth) / 2;
 
-  scene.fog = new THREE.Fog(C.bg, m.dist * 0.9, m.dist + depth * 1.35);
+  scene.fog = new THREE.Fog(C.haze, m.dist * 0.9, m.dist + depth * 1.35);
 
-  const floor = wall(W, L, C.floor);
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(0, -H / 2, cz);
-
-  const ceiling = wall(W, L, C.ceiling);
-  ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.set(0, H / 2, cz);
-
-  const left = wall(L, H, C.wall);
+  // side and back walls: coral sky fading to amber at the floor line
+  const left = gradWall(L, H, C.coral, C.amber);
   left.rotation.y = Math.PI / 2;
   left.position.set(-W / 2, 0, cz);
 
-  const right = wall(L, H, C.wall);
+  const right = gradWall(L, H, C.coral, C.amber);
   right.rotation.y = -Math.PI / 2;
   right.position.set(W / 2, 0, cz);
 
-  const back = wall(W, H, C.back);
+  const back = gradWall(W, H, C.coral, C.amber);
   back.position.set(0, 0, -depth);
+
+  // floor: light peach near, deeper amber far (local top edge = far side)
+  const floor = gradWall(W, L, C.floorFar, C.floorNear);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, -H / 2, cz);
+
+  // ceiling: bright near, sun-coral far (local bottom edge = far side)
+  const ceiling = gradWall(W, L, C.ceilNear, C.ceilFar);
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.set(0, H / 2, cz);
 
   group.add(floor, ceiling, left, right, back);
 
-  // glowing seams along every interior edge of the box
+  // white-gold seams along every interior edge of the box
   const edges = new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(W, H, L)),
-    new THREE.LineBasicMaterial({ color: C.edge, transparent: true, opacity: 0.9 })
+    new THREE.LineBasicMaterial({ color: C.seam, transparent: true, opacity: 0.95 })
   );
   edges.position.set(0, 0, cz);
   group.add(edges);
@@ -81,7 +92,7 @@ export function buildRoom(scene, m) {
   grid.position.set(0, -H / 2 + 1, cz);
   group.add(grid);
 
-  // slow-drifting dust motes for extra depth cues
+  // slow-drifting golden motes for extra depth cues
   const COUNT = 140;
   const pos = new Float32Array(COUNT * 3);
   for (let i = 0; i < COUNT; i++) {
@@ -95,10 +106,10 @@ export function buildRoom(scene, m) {
     dustGeo,
     new THREE.PointsMaterial({
       color: C.dust,
-      size: 2.2,
+      size: 2.4,
       sizeAttenuation: false,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.7,
     })
   );
   group.add(dust);

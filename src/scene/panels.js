@@ -4,11 +4,14 @@ import { youtubeApp } from '../apps/youtube.js';
 import { redditApp } from '../apps/reddit.js';
 import { githubApp } from '../apps/github.js';
 import { dashboardApp } from '../apps/dashboard.js';
+import { browserApp } from '../apps/browser.js';
 
-// one window per face of the box
+// one window per face of the box; the right wall is shared by the browser
+// and the system dashboard — the dock swaps between them
 const DEFS = [
   { app: spotifyApp, wall: 'left', w: 470, h: 580 },
-  { app: dashboardApp, wall: 'right', w: 440, h: 520 },
+  { app: browserApp, wall: 'right', w: 560, h: 500 },
+  { app: dashboardApp, wall: 'right', w: 440, h: 520, closed: true },
   { app: githubApp, wall: 'back', w: 640, h: 470 },
   { app: youtubeApp, wall: 'top', w: 660, h: 410 },
   { app: redditApp, wall: 'bottom', w: 620, h: 420 },

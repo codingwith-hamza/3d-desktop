@@ -1,6 +1,8 @@
+// first preset is the default — a regular video, not a live stream, so the
+// ceiling never shows an "unavailable" black frame on entry
 const PRESETS = [
-  { label: 'lofi radio', id: 'jfKfPfyJRdk' },
   { label: 'nature 4K', id: 'LXb3EKWsInQ' },
+  { label: 'lofi radio', id: 'jfKfPfyJRdk' },
   { label: 'big buck bunny', id: 'aqz-KE-bpKQ' },
 ];
 

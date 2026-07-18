@@ -1,24 +1,23 @@
-/* shared window chrome for all CSS3D app panels */
+/* shared window chrome for all CSS3D app panels — cream glass on sunset */
 
 .panel {
   display: flex;
   flex-direction: column;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.6),
-    0 0 42px rgba(76, 201, 240, 0.18),
-    0 24px 60px rgba(0, 0, 0, 0.55);
+    0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 18px 50px rgba(150, 80, 40, 0.28);
   pointer-events: auto;
   user-select: none;
   font-family: var(--font);
   transition: opacity 0.45s ease;
 }
 
-.panel.dimmed {
-  opacity: 0.16;
+.panel.off {
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -27,8 +26,8 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(58, 46, 42, 0.045);
+  border-bottom: 1px solid rgba(58, 46, 42, 0.08);
   flex: 0 0 auto;
 }
 
@@ -43,17 +42,21 @@
   border-radius: 50%;
 }
 
-.traffic .r { background: #ff5f57; }
+.traffic .r { background: #ff5f57; cursor: pointer; }
 .traffic .y { background: #febc2e; }
 .traffic .g { background: #28c840; cursor: pointer; }
 
+.traffic .r:hover {
+  box-shadow: 0 0 8px rgba(255, 95, 87, 0.9);
+}
+
 .traffic .g:hover {
-  box-shadow: 0 0 8px #28c840;
+  box-shadow: 0 0 8px rgba(40, 200, 64, 0.9);
 }
 
 .panel-title {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-dim);
   letter-spacing: 0.02em;
 }
@@ -77,6 +80,138 @@
   height: 100%;
   border: 0;
   display: block;
+  background: #fff;
+}
+
+/* ---------- browser ---------- */
+
+.bw {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bw-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--chip-line);
+}
+
+.bw-bar input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-line);
+  border-radius: 999px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 8px 16px;
+  outline: none;
+}
+
+.bw-bar input:focus {
+  border-color: var(--coral);
+  background: #fff;
+}
+
+.bw-home,
+.bw-ext {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.bw-home:hover,
+.bw-ext:hover {
+  color: var(--coral);
+  background: var(--chip-bg);
+}
+
+.bw-view {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #fff;
+}
+
+.bw-start {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  background:
+    radial-gradient(circle 260px at 50% 20%, rgba(255, 169, 77, 0.28), transparent 70%),
+    #fffaf2;
+  text-align: center;
+}
+
+.bw-mark {
+  font-size: clamp(26px, 4vw, 40px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  background: linear-gradient(115deg, #e04a3a, #ff8a3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bw-start-input {
+  width: min(420px, 90%);
+  background: #fff;
+  border: 1px solid var(--chip-line);
+  border-radius: 999px;
+  box-shadow: 0 6px 22px rgba(150, 80, 40, 0.14);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text);
+  padding: 12px 20px;
+  outline: none;
+}
+
+.bw-start-input:focus {
+  border-color: var(--coral);
+}
+
+.bw-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bw-chip {
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-line);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.bw-chip:hover {
+  background: rgba(255, 148, 84, 0.18);
+  border-color: var(--coral);
+}
+
+.bw-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  max-width: 380px;
 }
 
 /* ---------- spotify ---------- */
@@ -98,16 +233,16 @@
 
 .sp-user {
   font-size: 13px;
-  font-weight: 600;
-  color: #1ed760;
+  font-weight: 700;
+  color: #159d47;
 }
 
 .sp-login {
   font-family: var(--font);
   font-size: 13px;
   font-weight: 700;
-  color: #04140a;
-  background: #1ed760;
+  color: #fff;
+  background: #1ba94e;
   border: none;
   border-radius: 999px;
   padding: 8px 18px;
@@ -115,7 +250,7 @@
 }
 
 .sp-login:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
 }
 
 .sp-content {
@@ -141,7 +276,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--chip-bg);
   border: none;
   border-radius: 10px;
   padding: 10px;
@@ -152,7 +287,7 @@
 }
 
 .sp-list:hover {
-  background: rgba(30, 215, 96, 0.14);
+  background: rgba(27, 169, 78, 0.14);
 }
 
 .sp-list img {
@@ -160,12 +295,12 @@
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 6px;
-  background: #111;
+  background: #efe7db;
 }
 
 .sp-list .t {
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -182,7 +317,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 10px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid var(--chip-line);
   flex: 0 0 auto;
 }
 
@@ -194,7 +329,7 @@
 
 .sp-track .name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -237,8 +372,8 @@
 
 .yt-bar input {
   flex: 1 1 180px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-line);
   border-radius: 8px;
   color: var(--text);
   font-family: var(--font);
@@ -248,14 +383,16 @@
 }
 
 .yt-bar input:focus {
-  border-color: rgba(255, 0, 0, 0.5);
+  border-color: #e53935;
+  background: #fff;
 }
 
 .yt-chip {
   font-family: var(--font);
   font-size: 11.5px;
+  font-weight: 600;
   color: var(--text-dim);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--chip-bg);
   border: none;
   border-radius: 999px;
   padding: 6px 12px;
@@ -264,7 +401,7 @@
 
 .yt-chip:hover {
   color: var(--text);
-  background: rgba(255, 0, 0, 0.25);
+  background: rgba(229, 57, 53, 0.14);
 }
 
 .yt-frame {
@@ -291,9 +428,9 @@
 .rd-tab {
   font-family: var(--font);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-dim);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--chip-bg);
   border: none;
   border-radius: 999px;
   padding: 6px 13px;
@@ -323,17 +460,17 @@
   padding: 10px 14px;
   text-decoration: none;
   color: var(--text);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--chip-line);
 }
 
 .rd-post:hover {
-  background: rgba(255, 69, 0, 0.09);
+  background: rgba(255, 69, 0, 0.08);
 }
 
 .rd-score {
   flex: 0 0 auto;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: #ff4500;
   min-width: 52px;
 }
@@ -348,6 +485,7 @@
 .rd-title {
   font-size: 13px;
   line-height: 1.35;
+  font-weight: 600;
 }
 
 .rd-meta {
@@ -360,7 +498,7 @@
   font-size: 10.5px;
   color: var(--text-dim);
   padding: 7px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--chip-line);
 }
 
 /* ---------- github ---------- */
@@ -377,7 +515,7 @@
 }
 
 .gh-loading a {
-  color: var(--accent);
+  color: var(--coral);
 }
 
 .gh-head {
@@ -391,14 +529,14 @@
 }
 
 .gh-head:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--chip-bg);
 }
 
 .gh-head img {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  border: 2px solid rgba(76, 201, 240, 0.4);
+  border: 2px solid var(--amber);
 }
 
 .gh-id {
@@ -410,12 +548,13 @@
 
 .gh-name {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .gh-login {
   font-size: 12px;
-  color: var(--accent);
+  font-weight: 600;
+  color: var(--coral);
 }
 
 .gh-bio {
@@ -450,21 +589,21 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  background: var(--chip-bg);
+  border-radius: 12px;
   padding: 11px 13px;
   text-decoration: none;
   color: var(--text);
 }
 
 .gh-repo:hover {
-  background: rgba(76, 201, 240, 0.12);
+  background: rgba(255, 148, 84, 0.16);
 }
 
 .gh-repo-name {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
+  font-weight: 700;
+  color: #d8543f;
 }
 
 .gh-repo-desc {
@@ -513,8 +652,8 @@
   font-size: 46px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--accent);
-  text-shadow: 0 0 24px rgba(76, 201, 240, 0.45);
+  color: var(--coral);
+  text-shadow: 0 2px 18px rgba(255, 111, 97, 0.35);
 }
 
 .dash-date {
@@ -541,19 +680,19 @@
 }
 
 .dash-row:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--chip-bg);
 }
 
 .dash-row b {
   font-family: var(--mono);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
 }
 
 .dash-fpsbar {
   height: 5px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--chip-bg);
   margin: auto 6px 6px;
   overflow: hidden;
 }
@@ -563,6 +702,6 @@
   height: 100%;
   width: 0;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  background: linear-gradient(90deg, var(--coral), var(--amber));
   transition: width 0.4s ease;
 }

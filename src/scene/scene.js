@@ -5,12 +5,13 @@ import { buildRoom } from './room.js';
 import { createPanels, layoutPanels } from './panels.js';
 import { createFocus } from './focus.js';
 import { stats } from '../ui/stats.js';
+import { createDock } from '../ui/dock.js';
 
 export function createScene(container, input) {
   const m = computeMetrics();
 
   const glScene = new THREE.Scene();
-  glScene.background = new THREE.Color(0x05060a);
+  glScene.background = new THREE.Color(0xfff3e4);
   const cssScene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(50, m.W / m.H, 10, m.dist + m.depth * 3);
@@ -31,6 +32,7 @@ export function createScene(container, input) {
   layoutPanels(panels, m);
   const focus = createFocus(panels, m);
   focus.maximizeAll(); // default look: every wall fully covered by its app
+  createDock(focus);
 
   window.addEventListener('resize', () => {
     computeMetrics(m);
