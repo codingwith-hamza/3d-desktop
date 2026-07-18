@@ -1,99 +1,81 @@
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
+import { spotifyApp } from '../apps/spotify.js';
+import { youtubeApp } from '../apps/youtube.js';
+import { redditApp } from '../apps/reddit.js';
+import { githubApp } from '../apps/github.js';
+import { dashboardApp } from '../apps/dashboard.js';
 
-// Phase 1: placeholder window bodies with real chrome so the 3D feel can be
-// judged. Real app logic (explorer, terminal, etc.) lands in src/apps/ next.
-const PLACEHOLDERS = {
-  files: `
-    <div class="files-grid">
-      ${['Projects', 'Photos', 'Music', 'Ideas', 'Demos', 'Archive']
-        .map(
-          (n) => `<div class="file-item"><span class="icon">📁</span><span>${n}</span></div>`
-        )
-        .join('')}
-    </div>`,
-  notes: `
-    <textarea class="notes-area" placeholder="Type something… it stays while you're here."></textarea>`,
-  terminal: `
-    <div><span class="prompt">guest@3d-desktop ~ %</span> whoami</div>
-    <div>a person whose screen just became a window</div>
-    <div><span class="prompt">guest@3d-desktop ~ %</span> <span class="cursor"></span></div>`,
-  media: `
-    <div class="media-art">
-      <div class="viz">
-        ${Array.from({ length: 9 }, (_, i) => `<span style="animation-delay:${(i * 0.12).toFixed(2)}s"></span>`).join('')}
-      </div>
-    </div>
-    <div class="media-track">
-      <div class="name">Parallax Dreams</div>
-      <div class="artist">The Head Trackers</div>
-    </div>
-    <div class="media-seek"><div class="fill"></div></div>
-    <div class="media-controls">
-      <button>⏮</button><button>▶</button><button>⏭</button>
-    </div>`,
-};
-
+// one window per face of the box
 const DEFS = [
-  { id: 'files', title: 'Files', wall: 'left' },
-  { id: 'media', title: 'Media Player', wall: 'right' },
-  { id: 'notes', title: 'Notes', wall: 'back-left' },
-  { id: 'terminal', title: 'Terminal', wall: 'back-right' },
+  { app: spotifyApp, wall: 'left', w: 470, h: 580 },
+  { app: dashboardApp, wall: 'right', w: 440, h: 520 },
+  { app: githubApp, wall: 'back', w: 640, h: 470 },
+  { app: youtubeApp, wall: 'top', w: 660, h: 410 },
+  { app: redditApp, wall: 'bottom', w: 620, h: 420 },
 ];
 
-function windowEl(def, w, h) {
+// ceiling/floor windows hang at an angle toward the viewer so they stay
+// readable instead of being seen edge-on
+const TILT = 0.9;
+
+function windowEl(def) {
   const el = document.createElement('div');
   el.className = 'panel';
-  el.style.width = `${w}px`;
-  el.style.height = `${h}px`;
   el.innerHTML = `
     <div class="panel-titlebar">
-      <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-      <div class="panel-title">${def.title}</div>
+      <div class="traffic"><span class="r"></span><span class="y"></span><span class="g" title="maximize"></span></div>
+      <div class="panel-title">${def.app.title}</div>
     </div>
-    <div class="panel-body${def.id === 'terminal' ? ' term' : ''}">${PLACEHOLDERS[def.id]}</div>`;
+    <div class="panel-body"></div>`;
+  def.app.mount(el.querySelector('.panel-body'));
   return el;
 }
 
-export function createPanels(cssScene, m) {
-  const size = panelSize(m);
+export function createPanels(cssScene) {
   return DEFS.map((def) => {
-    const obj = new CSS3DObject(windowEl(def, size.w, size.h));
+    const obj = new CSS3DObject(windowEl(def));
     cssScene.add(obj);
     return { def, obj };
   });
 }
 
-function panelSize(m) {
-  const w = Math.round(Math.min(m.W * 0.42, 520));
-  return { w, h: Math.round(w * 0.72) };
-}
-
-// place each window flush against its wall, tilted with the wall itself
 export function layoutPanels(panels, m) {
-  const { W, depth } = m;
-  const size = panelSize(m);
-  const inset = 4; // keep panels a hair off the wall to avoid z-fighting
+  const { W, H, depth } = m;
+  const inset = 6;
 
   for (const { def, obj } of panels) {
-    obj.element.style.width = `${size.w}px`;
-    obj.element.style.height = `${size.h}px`;
+    // clamp to what the wall can actually hold on small screens
+    const w = Math.round(Math.min(def.w, W * 0.6, depth * 0.62));
+    const h = Math.round(Math.min(def.h, H * 0.74));
+    obj.element.style.width = `${w}px`;
+    obj.element.style.height = `${h}px`;
     obj.rotation.set(0, 0, 0);
 
     switch (def.wall) {
       case 'left':
-        obj.position.set(-W / 2 + inset, 0, -depth * 0.46);
+        obj.position.set(-W / 2 + inset, 0, -depth * 0.5);
         obj.rotation.y = Math.PI / 2;
         break;
       case 'right':
-        obj.position.set(W / 2 - inset, 0, -depth * 0.46);
+        obj.position.set(W / 2 - inset, 0, -depth * 0.5);
         obj.rotation.y = -Math.PI / 2;
         break;
-      case 'back-left':
-        obj.position.set(-W * 0.21, 0, -depth + inset);
+      case 'back':
+        obj.position.set(0, 0, -depth + inset);
         break;
-      case 'back-right':
-        obj.position.set(W * 0.21, 0, -depth + inset);
+      case 'top': {
+        // top edge kisses the ceiling, face angled down toward the viewer
+        const cz = -depth * 0.55;
+        obj.position.set(0, H / 2 - inset - (h / 2) * Math.cos(TILT), cz);
+        obj.rotation.x = TILT;
         break;
+      }
+      case 'bottom': {
+        const cz = -depth * 0.55;
+        obj.position.set(0, -H / 2 + inset + (h / 2) * Math.cos(TILT), cz);
+        obj.rotation.x = -TILT;
+        break;
+      }
     }
   }
 }

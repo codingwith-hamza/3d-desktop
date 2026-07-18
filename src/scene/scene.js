@@ -4,6 +4,7 @@ import { computeMetrics, updateCamera } from './projection.js';
 import { buildRoom } from './room.js';
 import { createPanels, layoutPanels } from './panels.js';
 import { createFocus } from './focus.js';
+import { stats } from '../ui/stats.js';
 
 export function createScene(container, input) {
   const m = computeMetrics();
@@ -46,12 +47,21 @@ export function createScene(container, input) {
   const clock = new THREE.Clock();
   let running = false;
   let introT = 0; // short dolly-in when entering the room
+  let fpsFrames = 0;
+  let fpsTime = 0;
 
   function frame() {
     if (!running) return;
     requestAnimationFrame(frame);
 
     const dt = Math.min(clock.getDelta(), 0.05);
+    fpsFrames += 1;
+    fpsTime += dt;
+    if (fpsTime >= 0.5) {
+      stats.fps = fpsFrames / fpsTime;
+      fpsFrames = 0;
+      fpsTime = 0;
+    }
     introT = Math.min(introT + dt / 1.4, 1);
     const ease = 1 - Math.pow(1 - introT, 3);
     const introOffset = m.dist * 0.4 * (1 - ease);
