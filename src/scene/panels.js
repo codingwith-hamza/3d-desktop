@@ -5,14 +5,16 @@ import { redditApp } from '../apps/reddit.js';
 import { githubApp } from '../apps/github.js';
 import { dashboardApp } from '../apps/dashboard.js';
 import { browserApp } from '../apps/browser.js';
+import { googleApp } from '../apps/google.js';
 
-// one window per face of the box; the right wall is shared by the browser
-// and the system dashboard — the dock swaps between them
+// one window per face; Google faces the viewer on the back wall. The right
+// wall is shared by browser / system / github — the dock swaps between them.
 const DEFS = [
+  { app: googleApp, wall: 'back', w: 720, h: 500 },
   { app: spotifyApp, wall: 'left', w: 470, h: 580 },
   { app: browserApp, wall: 'right', w: 560, h: 500 },
   { app: dashboardApp, wall: 'right', w: 440, h: 520, closed: true },
-  { app: githubApp, wall: 'back', w: 640, h: 470 },
+  { app: githubApp, wall: 'right', w: 640, h: 470, closed: true },
   { app: youtubeApp, wall: 'top', w: 660, h: 410 },
   { app: redditApp, wall: 'bottom', w: 620, h: 420 },
 ];

@@ -1,0 +1,17 @@
+run = "npm run dev"
+entrypoint = "index.html"
+modules = ["nodejs-22"]
+
+[nix]
+channel = "stable-24_05"
+
+# Dev preview
+[[ports]]
+localPort = 5173
+externalPort = 80
+
+# One-click static deploy: build to dist/ and serve it
+[deployment]
+build = ["npm", "run", "build"]
+publicDir = "dist"
+deploymentTarget = "static"

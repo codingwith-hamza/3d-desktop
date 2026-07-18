@@ -1,4 +1,5 @@
 const ICONS = {
+  google: '🔎',
   spotify: '🎵',
   browser: '🌐',
   dashboard: '📊',
