@@ -73,7 +73,7 @@ export function createScene(container, input) {
     const head = input.update(dt);
     updateCamera(camera, head, m, introOffset);
     room.update(dt);
-    focus.update(dt);
+    focus.update(dt, head);
 
     gl.render(glScene, camera);
     css.render(cssScene, camera);
