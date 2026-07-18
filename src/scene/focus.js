@@ -1,14 +1,32 @@
 import * as THREE from 'three';
 
-const _IDENT = new THREE.Quaternion();
-const _MAXPOS = new THREE.Vector3(0, 0, 0); // screen plane — fills the viewport exactly
+const _euler = new THREE.Euler();
+
+// where a window sits when maximized: covering its own wall face, leaving a
+// thin gap so the neon corner seams still show between walls (reference look)
+function wallTarget(def, m) {
+  const { W, H, depth } = m;
+  const gap = 14;
+  const off = 4;
+  switch (def.wall) {
+    case 'left':
+      return { pos: [-W / 2 + off, 0, -depth / 2], rot: [0, Math.PI / 2, 0], w: depth - gap * 2, h: H - gap * 2 };
+    case 'right':
+      return { pos: [W / 2 - off, 0, -depth / 2], rot: [0, -Math.PI / 2, 0], w: depth - gap * 2, h: H - gap * 2 };
+    case 'back':
+      return { pos: [0, 0, -depth + off], rot: [0, 0, 0], w: W - gap * 2, h: H - gap * 2 };
+    case 'top':
+      return { pos: [0, H / 2 - off, -depth / 2], rot: [Math.PI / 2, 0, 0], w: W - gap * 2, h: depth - gap * 2 };
+    case 'bottom':
+      return { pos: [0, -H / 2 + off, -depth / 2], rot: [-Math.PI / 2, 0, 0], w: W - gap * 2, h: depth - gap * 2 };
+  }
+}
 
 // Maximize/restore: the green traffic light (or double-clicking the titlebar)
-// flies a window off its wall to the screen plane, where — thanks to the
-// pinned projection — width m.W × height m.H at z = 0 is exactly fullscreen.
-// Esc or clicking the green light again sends it back. Others dim meanwhile.
+// grows a window to cover its own wall face — flat against the wall, other
+// windows untouched, so any combination (including all five) can be maximized
+// and the box interior becomes pure app surface. Esc restores everything.
 export function createFocus(panels, m) {
-  let active = null;
   const state = new Map();
 
   snapshotHomes();
@@ -19,7 +37,9 @@ export function createFocus(panels, m) {
     el.querySelector('.panel-titlebar').addEventListener('dblclick', () => toggle(p));
   }
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && active) toggle(active);
+    if (e.key === 'Escape') {
+      for (const st of state.values()) st.target = 0;
+    }
   });
 
   function snapshotHomes() {
@@ -28,6 +48,9 @@ export function createFocus(panels, m) {
       state.set(p, {
         homePos: p.obj.position.clone(),
         homeQuat: p.obj.quaternion.clone(),
+        max: null,
+        maxPos: new THREE.Vector3(),
+        maxQuat: new THREE.Quaternion(),
         baseW: parseFloat(p.obj.element.style.width),
         baseH: parseFloat(p.obj.element.style.height),
         cur: prev?.cur ?? 0,
@@ -37,15 +60,18 @@ export function createFocus(panels, m) {
     }
   }
 
-  // swap the element to fullscreen dimensions while compensating with scale,
-  // so text re-rasterizes crisp at full size instead of stretching
+  // swap the element to wall dimensions while compensating with scale,
+  // so content re-rasterizes crisp at full size instead of stretching
   function sizeUp(p) {
     const st = state.get(p);
     if (st.sized) return;
     st.baseW = parseFloat(p.obj.element.style.width);
     st.baseH = parseFloat(p.obj.element.style.height);
-    p.obj.element.style.width = `${m.W}px`;
-    p.obj.element.style.height = `${m.H}px`;
+    st.max = wallTarget(p.def, m);
+    st.maxPos.set(...st.max.pos);
+    st.maxQuat.setFromEuler(_euler.set(...st.max.rot));
+    p.obj.element.style.width = `${Math.round(st.max.w)}px`;
+    p.obj.element.style.height = `${Math.round(st.max.h)}px`;
     st.sized = true;
   }
 
@@ -61,24 +87,14 @@ export function createFocus(panels, m) {
     st.cur = 0;
   }
 
-  function refreshDimming() {
-    for (const p of panels) {
-      p.obj.element.classList.toggle('dimmed', active !== null && p !== active);
-    }
-  }
-
   function toggle(p) {
     const st = state.get(p);
-    if (active === p) {
-      active = null;
+    if (st.target === 1) {
       st.target = 0;
     } else {
-      if (active) state.get(active).target = 0;
-      active = p;
       st.target = 1;
       sizeUp(p);
     }
-    refreshDimming();
   }
 
   return {
@@ -92,24 +108,25 @@ export function createFocus(panels, m) {
           sizeDown(p);
           continue;
         }
-        p.obj.position.lerpVectors(st.homePos, _MAXPOS, st.cur);
-        p.obj.quaternion.slerpQuaternions(st.homeQuat, _IDENT, st.cur);
+        p.obj.position.lerpVectors(st.homePos, st.maxPos, st.cur);
+        p.obj.quaternion.slerpQuaternions(st.homeQuat, st.maxQuat, st.cur);
         p.obj.scale.set(
-          THREE.MathUtils.lerp(st.baseW / m.W, 1, st.cur),
-          THREE.MathUtils.lerp(st.baseH / m.H, 1, st.cur),
+          THREE.MathUtils.lerp(st.baseW / st.max.w, 1, st.cur),
+          THREE.MathUtils.lerp(st.baseH / st.max.h, 1, st.cur),
           1
         );
       }
     },
 
-    // call after layoutPanels() on resize: re-capture wall slots and keep an
-    // active window sized to the new viewport
+    // call after layoutPanels() on resize: re-capture wall slots and re-fit
+    // any maximized windows to the resized walls
     onResize() {
+      const wasMax = panels.filter((p) => state.get(p).target === 1);
       snapshotHomes();
-      if (active) {
-        const st = state.get(active);
+      for (const p of wasMax) {
+        const st = state.get(p);
         st.sized = false;
-        sizeUp(active);
+        sizeUp(p);
       }
     },
   };
