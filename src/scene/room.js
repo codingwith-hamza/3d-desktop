@@ -68,7 +68,9 @@ export function buildRoom(scene, m) {
     new THREE.EdgesGeometry(new THREE.BoxGeometry(W, H, depth)),
     new THREE.LineBasicMaterial({ color: C.edge, transparent: true, opacity: 0.9 })
   );
-  edges.position.set(0, 0, -depth / 2);
+  // front edge ring sits a few px inside the opening, so a faint neon rim
+  // frames the portal during head movement instead of clipping at the border
+  edges.position.set(0, 0, -depth / 2 - 6);
   group.add(edges);
 
   const grid = makeGrid(W, depth, Math.round(H / 9));

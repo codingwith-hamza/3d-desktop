@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
-import { FOV, computeMetrics, updateCamera } from './projection.js';
+import { computeMetrics, updateCamera } from './projection.js';
 import { buildRoom } from './room.js';
 import { createPanels, layoutPanels } from './panels.js';
+import { createFocus } from './focus.js';
 
 export function createScene(container, input) {
   const m = computeMetrics();
@@ -11,7 +12,7 @@ export function createScene(container, input) {
   glScene.background = new THREE.Color(0x05060a);
   const cssScene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(FOV, m.W / m.H, 10, m.dist + m.depth * 3);
+  const camera = new THREE.PerspectiveCamera(50, m.W / m.H, 10, m.dist + m.depth * 3);
 
   const gl = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -27,6 +28,7 @@ export function createScene(container, input) {
   let room = buildRoom(glScene, m);
   const panels = createPanels(cssScene, m);
   layoutPanels(panels, m);
+  const focus = createFocus(panels, m);
 
   window.addEventListener('resize', () => {
     computeMetrics(m);
@@ -38,6 +40,7 @@ export function createScene(container, input) {
     room.dispose();
     room = buildRoom(glScene, m);
     layoutPanels(panels, m);
+    focus.onResize();
   });
 
   const clock = new THREE.Clock();
@@ -56,6 +59,7 @@ export function createScene(container, input) {
     const head = input.update(dt);
     updateCamera(camera, head, m, introOffset);
     room.update(dt);
+    focus.update(dt);
 
     gl.render(glScene, camera);
     css.render(cssScene, camera);

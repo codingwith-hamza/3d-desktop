@@ -39,7 +39,20 @@
 
 .traffic .r { background: #ff5f57; }
 .traffic .y { background: #febc2e; }
-.traffic .g { background: #28c840; }
+.traffic .g { background: #28c840; cursor: pointer; }
+
+.traffic .g:hover {
+  box-shadow: 0 0 8px #28c840;
+}
+
+.panel {
+  transition: opacity 0.45s ease;
+}
+
+.panel.dimmed {
+  opacity: 0.16;
+  pointer-events: none;
+}
 
 .panel-title {
   font-size: 13px;
@@ -60,7 +73,7 @@
 
 .files-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 10px;
 }
 
