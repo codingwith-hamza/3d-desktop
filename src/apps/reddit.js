@@ -5,6 +5,11 @@
 // snapshot of classic posts that link out to the real subreddits.
 const SUBS = ['programmerhumor', 'webdev', 'oddlysatisfying'];
 
+// Reddit currently 403s anonymous feeds, and the failed attempt prints a
+// CORS error in every visitor's console — keep the demo console clean and
+// go straight to the snapshot. Flip on if Reddit ever re-opens the API.
+const TRY_LIVE = false;
+
 const SNAPSHOT = {
   programmerhumor: [
     { title: 'It works on my machine ¯\\_(ツ)_/¯', score: '98k', comments: '2.1k' },
@@ -85,7 +90,7 @@ export const redditApp = {
 
     async function show(sub) {
       list.innerHTML = `<div class="rd-loading">loading r/${sub}…</div>`;
-      const live = await fetchLive(sub);
+      const live = TRY_LIVE ? await fetchLive(sub) : null;
       const posts = live || SNAPSHOT[sub];
       noteEl.hidden = !!live;
       list.innerHTML = posts.map((p) => row(p, sub)).join('');

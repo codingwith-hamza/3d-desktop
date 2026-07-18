@@ -45,17 +45,18 @@ export function createScene(container, input) {
     focus.onResize();
   });
 
-  const clock = new THREE.Clock();
+  let last = 0;
   let running = false;
   let introT = 0; // short dolly-in when entering the room
   let fpsFrames = 0;
   let fpsTime = 0;
 
-  function frame() {
+  function frame(now = performance.now()) {
     if (!running) return;
     requestAnimationFrame(frame);
 
-    const dt = Math.min(clock.getDelta(), 0.05);
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
     fpsFrames += 1;
     fpsTime += dt;
     if (fpsTime >= 0.5) {
@@ -79,7 +80,7 @@ export function createScene(container, input) {
   return {
     start() {
       running = true;
-      clock.start();
+      last = performance.now();
       frame();
     },
   };
