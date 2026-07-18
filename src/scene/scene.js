@@ -30,6 +30,7 @@ export function createScene(container, input) {
   const panels = createPanels(cssScene, m);
   layoutPanels(panels, m);
   const focus = createFocus(panels, m);
+  focus.maximizeAll(); // default look: every wall fully covered by its app
 
   window.addEventListener('resize', () => {
     computeMetrics(m);

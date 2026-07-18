@@ -98,6 +98,13 @@ export function createFocus(panels, m) {
   }
 
   return {
+    maximizeAll() {
+      for (const p of panels) {
+        state.get(p).target = 1;
+        sizeUp(p);
+      }
+    },
+
     update(dt) {
       const k = 1 - Math.exp(-dt * 7);
       for (const p of panels) {
