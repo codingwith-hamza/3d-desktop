@@ -1,0 +1,71 @@
+import * as THREE from 'three';
+import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
+import { FOV, computeMetrics, updateCamera } from './projection.js';
+import { buildRoom } from './room.js';
+import { createPanels, layoutPanels } from './panels.js';
+
+export function createScene(container, input) {
+  const m = computeMetrics();
+
+  const glScene = new THREE.Scene();
+  glScene.background = new THREE.Color(0x05060a);
+  const cssScene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(FOV, m.W / m.H, 10, m.dist + m.depth * 3);
+
+  const gl = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  gl.setSize(m.W, m.H);
+  gl.domElement.className = 'gl-layer';
+  container.appendChild(gl.domElement);
+
+  const css = new CSS3DRenderer();
+  css.setSize(m.W, m.H);
+  css.domElement.className = 'css-layer';
+  container.appendChild(css.domElement);
+
+  let room = buildRoom(glScene, m);
+  const panels = createPanels(cssScene, m);
+  layoutPanels(panels, m);
+
+  window.addEventListener('resize', () => {
+    computeMetrics(m);
+    camera.aspect = m.W / m.H;
+    camera.far = m.dist + m.depth * 3;
+    camera.updateProjectionMatrix();
+    gl.setSize(m.W, m.H);
+    css.setSize(m.W, m.H);
+    room.dispose();
+    room = buildRoom(glScene, m);
+    layoutPanels(panels, m);
+  });
+
+  const clock = new THREE.Clock();
+  let running = false;
+  let introT = 0; // short dolly-in when entering the room
+
+  function frame() {
+    if (!running) return;
+    requestAnimationFrame(frame);
+
+    const dt = Math.min(clock.getDelta(), 0.05);
+    introT = Math.min(introT + dt / 1.4, 1);
+    const ease = 1 - Math.pow(1 - introT, 3);
+    const introOffset = m.dist * 0.4 * (1 - ease);
+
+    const head = input.update(dt);
+    updateCamera(camera, head, m, introOffset);
+    room.update(dt);
+
+    gl.render(glScene, camera);
+    css.render(cssScene, camera);
+  }
+
+  return {
+    start() {
+      running = true;
+      clock.start();
+      frame();
+    },
+  };
+}
