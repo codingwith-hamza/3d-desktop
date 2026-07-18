@@ -16,4 +16,4 @@ export const GITHUB_USER = 'codingwith-hamza';
 // Setup (~2 min): https://programmablesearchengine.google.com/ → Add → "Search
 // the entire web" → create → copy the Search engine ID (looks like a1b2c3...)
 // and paste it below. Empty = the search box opens real Google in a new tab.
-export const GOOGLE_CSE_ID = '';
+export const GOOGLE_CSE_ID = '36c736d301728463b';

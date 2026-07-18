@@ -92,6 +92,12 @@
   color: #202124;
 }
 
+/* the display:flex rules below otherwise override the [hidden] attribute */
+.gg-home[hidden],
+.gg-results[hidden] {
+  display: none;
+}
+
 .gg-home {
   height: 100%;
   display: flex;
