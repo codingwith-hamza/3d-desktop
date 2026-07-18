@@ -11,7 +11,7 @@ export function createScene(container, input) {
   const m = computeMetrics();
 
   const glScene = new THREE.Scene();
-  glScene.background = new THREE.Color(0xfff3e4);
+  glScene.background = new THREE.Color(0x0b0a10);
   const cssScene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(50, m.W / m.H, 10, m.dist + m.depth * 3);

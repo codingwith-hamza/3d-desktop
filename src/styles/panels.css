@@ -1,4 +1,4 @@
-/* shared window chrome for all CSS3D app panels — cream glass on sunset */
+/* shared window chrome for all CSS3D app panels — smoked glass, ember trim */
 
 .panel {
   display: flex;
@@ -8,8 +8,9 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.55),
-    0 18px 50px rgba(150, 80, 40, 0.28);
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 44px rgba(255, 138, 76, 0.1),
+    0 24px 60px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
   user-select: none;
   font-family: var(--font);
@@ -26,8 +27,8 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(58, 46, 42, 0.045);
-  border-bottom: 1px solid rgba(58, 46, 42, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   flex: 0 0 auto;
 }
 
@@ -115,7 +116,7 @@
 
 .bw-bar input:focus {
   border-color: var(--coral);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .bw-home,
@@ -151,8 +152,8 @@
   gap: 20px;
   padding: 24px;
   background:
-    radial-gradient(circle 260px at 50% 20%, rgba(255, 169, 77, 0.28), transparent 70%),
-    #fffaf2;
+    radial-gradient(circle 280px at 50% 15%, rgba(255, 138, 76, 0.16), transparent 70%),
+    #14121c;
   text-align: center;
 }
 
@@ -161,7 +162,7 @@
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.02em;
-  background: linear-gradient(115deg, #e04a3a, #ff8a3d);
+  background: linear-gradient(115deg, #fff0e2 15%, #ff8a4c 65%, #ffc46b);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -169,10 +170,10 @@
 
 .bw-start-input {
   width: min(420px, 90%);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--chip-line);
   border-radius: 999px;
-  box-shadow: 0 6px 22px rgba(150, 80, 40, 0.14);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
   font-family: var(--font);
   font-size: 14px;
   color: var(--text);
@@ -234,15 +235,15 @@
 .sp-user {
   font-size: 13px;
   font-weight: 700;
-  color: #159d47;
+  color: #1ed760;
 }
 
 .sp-login {
   font-family: var(--font);
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
-  background: #1ba94e;
+  color: #04140a;
+  background: #1ed760;
   border: none;
   border-radius: 999px;
   padding: 8px 18px;
@@ -287,7 +288,7 @@
 }
 
 .sp-list:hover {
-  background: rgba(27, 169, 78, 0.14);
+  background: rgba(30, 215, 96, 0.13);
 }
 
 .sp-list img {
@@ -295,7 +296,7 @@
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 6px;
-  background: #efe7db;
+  background: #211d2b;
 }
 
 .sp-list .t {
@@ -384,7 +385,7 @@
 
 .yt-bar input:focus {
   border-color: #e53935;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .yt-chip {
@@ -603,7 +604,7 @@
 .gh-repo-name {
   font-size: 13px;
   font-weight: 700;
-  color: #d8543f;
+  color: var(--coral);
 }
 
 .gh-repo-desc {
@@ -653,7 +654,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--coral);
-  text-shadow: 0 2px 18px rgba(255, 111, 97, 0.35);
+  text-shadow: 0 0 22px rgba(255, 138, 76, 0.45);
 }
 
 .dash-date {

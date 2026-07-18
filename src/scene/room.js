@@ -1,18 +1,18 @@
 import * as THREE from 'three';
 
-// Sunset Studio palette: the room reads as golden-hour light — coral high,
-// amber low, peach underfoot, warm cream haze in the distance.
+// Ember on Obsidian: deep violet-black surfaces, ember-orange seams, golden
+// motes — dark with one warm accent instead of wall-to-wall neon.
 const C = {
-  haze: 0xfff3e4,
-  coral: 0xff6f61,
-  amber: 0xffbf69,
-  floorFar: 0xffb967,
-  floorNear: 0xffd9a6,
-  ceilNear: 0xffdfc2,
-  ceilFar: 0xff8a6e,
-  seam: 0xffe9be,
-  grid: 0xe8a96b,
-  dust: 0xfff1cf,
+  haze: 0x0b0a10,
+  coral: 0x221a35, // wall top: deep violet
+  amber: 0x0d0b13, // wall bottom: near-black
+  floorFar: 0x181229,
+  floorNear: 0x0d0b13,
+  ceilNear: 0x110f1a,
+  ceilFar: 0x2a1c40,
+  seam: 0xff9d5c,
+  grid: 0x5a4a8a,
+  dust: 0xffd9a8,
 };
 
 // plane with a vertical vertex-color gradient (top → bottom in local space)
@@ -40,7 +40,7 @@ function makeGrid(w, d, step) {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
   return new THREE.LineSegments(
     geo,
-    new THREE.LineBasicMaterial({ color: C.grid, transparent: true, opacity: 0.3 })
+    new THREE.LineBasicMaterial({ color: C.grid, transparent: true, opacity: 0.35 })
   );
 }
 
@@ -55,7 +55,7 @@ export function buildRoom(scene, m) {
 
   scene.fog = new THREE.Fog(C.haze, m.dist * 0.9, m.dist + depth * 1.35);
 
-  // side and back walls: coral sky fading to amber at the floor line
+  // side and back walls: violet glow high, fading to black at the floor line
   const left = gradWall(L, H, C.coral, C.amber);
   left.rotation.y = Math.PI / 2;
   left.position.set(-W / 2, 0, cz);
@@ -79,10 +79,10 @@ export function buildRoom(scene, m) {
 
   group.add(floor, ceiling, left, right, back);
 
-  // white-gold seams along every interior edge of the box
+  // ember seams along every interior edge of the box
   const edges = new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(W, H, L)),
-    new THREE.LineBasicMaterial({ color: C.seam, transparent: true, opacity: 0.95 })
+    new THREE.LineBasicMaterial({ color: C.seam, transparent: true, opacity: 0.85 })
   );
   edges.position.set(0, 0, cz);
   group.add(edges);

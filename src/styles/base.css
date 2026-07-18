@@ -1,16 +1,16 @@
 :root {
-  /* Sunset Studio — single place to retheme the whole demo */
-  --bg: #fff3e4;
-  --coral: #ff6f61;
-  --amber: #ffbf69;
-  --accent: #ff6f61;
-  --accent-2: #ffa94d;
-  --text: #3a2e2a;
-  --text-dim: #9a8378;
-  --panel-bg: rgba(255, 251, 244, 0.94);
-  --panel-border: rgba(255, 168, 112, 0.55);
-  --chip-bg: rgba(58, 46, 42, 0.06);
-  --chip-line: rgba(58, 46, 42, 0.1);
+  /* Ember on Obsidian — single place to retheme the whole demo */
+  --bg: #0b0a10;
+  --coral: #ff8a4c; /* ember accent */
+  --amber: #ffc46b; /* gold secondary */
+  --accent: #ff8a4c;
+  --accent-2: #ffc46b;
+  --text: #ece7e1;
+  --text-dim: #9a93a4;
+  --panel-bg: rgba(21, 18, 29, 0.93);
+  --panel-border: rgba(255, 157, 92, 0.3);
+  --chip-bg: rgba(255, 255, 255, 0.07);
+  --chip-line: rgba(255, 255, 255, 0.11);
   --font: 'Avenir Next', 'Avenir', 'Futura', 'Trebuchet MS', -apple-system, 'Segoe UI', sans-serif;
   --mono: 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace;
 }
@@ -61,8 +61,9 @@ body {
   justify-content: center;
   text-align: center;
   background:
-    radial-gradient(circle 420px at 50% 34%, rgba(255, 169, 77, 0.55), rgba(255, 111, 97, 0.22) 60%, transparent 75%),
-    linear-gradient(180deg, #fff8ee 0%, #ffe8cd 58%, #ffd6ae 100%);
+    radial-gradient(ellipse 75% 55% at 50% 108%, rgba(255, 138, 76, 0.28), transparent 65%),
+    radial-gradient(ellipse 60% 45% at 50% 30%, rgba(124, 92, 255, 0.1), transparent 70%),
+    linear-gradient(180deg, #0e0c15 0%, #0b0a10 100%);
   opacity: 1;
   transition: opacity 0.9s ease;
 }
@@ -81,9 +82,9 @@ body {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.22em;
-  color: #a4795a;
-  border: 1px solid rgba(164, 121, 90, 0.35);
-  background: rgba(255, 255, 255, 0.45);
+  color: var(--text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 999px;
   display: inline-block;
   padding: 6px 14px;
@@ -94,7 +95,7 @@ body {
   font-size: clamp(46px, 8vw, 80px);
   font-weight: 800;
   letter-spacing: -0.03em;
-  background: linear-gradient(115deg, #e04a3a 25%, #ff8a3d 60%, #f2a93b);
+  background: linear-gradient(115deg, #fff0e2 20%, #ff8a4c 60%, #ffc46b);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -102,7 +103,7 @@ body {
 }
 
 .tagline {
-  color: #7c6355;
+  color: var(--text-dim);
   font-size: 17.5px;
   line-height: 1.55;
   margin-bottom: 36px;
@@ -112,19 +113,19 @@ body {
   font-family: var(--font);
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(120deg, #ff6f61, #ff9345);
+  color: #1c0e05;
+  background: linear-gradient(120deg, #ff8a4c, #ffc46b);
   border: none;
   border-radius: 14px;
   padding: 16px 42px;
   cursor: pointer;
-  box-shadow: 0 12px 32px rgba(255, 111, 97, 0.4);
+  box-shadow: 0 10px 36px rgba(255, 138, 76, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 #enter-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 44px rgba(255, 111, 97, 0.55);
+  box-shadow: 0 14px 48px rgba(255, 138, 76, 0.5);
 }
 
 #enter-btn:active {
@@ -135,7 +136,7 @@ body {
   margin-top: 30px;
   font-size: 12.5px;
   line-height: 1.65;
-  color: #a08a7d;
+  color: #7d7686;
 }
 
 /* ---------- hint / toast ---------- */
@@ -146,9 +147,9 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
-  background: rgba(255, 251, 244, 0.92);
-  border: 1px solid rgba(255, 168, 112, 0.5);
-  box-shadow: 0 8px 28px rgba(150, 80, 40, 0.18);
+  background: rgba(18, 16, 26, 0.9);
+  border: 1px solid rgba(255, 157, 92, 0.35);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   color: var(--text);
   font-size: 14px;
   font-weight: 600;
@@ -184,9 +185,9 @@ body {
   gap: 6px;
   padding: 8px 10px;
   border-radius: 18px;
-  background: rgba(255, 251, 244, 0.85);
-  border: 1px solid rgba(255, 168, 112, 0.45);
-  box-shadow: 0 14px 38px rgba(150, 80, 40, 0.22);
+  background: rgba(20, 18, 28, 0.85);
+  border: 1px solid rgba(255, 157, 92, 0.28);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(10px);
 }
 
@@ -206,7 +207,7 @@ body {
 
 .dock-btn:hover {
   transform: translateY(-3px);
-  background: rgba(255, 148, 84, 0.16);
+  background: rgba(255, 138, 76, 0.14);
 }
 
 .dock-btn i {
@@ -218,10 +219,10 @@ body {
 
 .dock-btn.on i {
   background: var(--coral);
-  box-shadow: 0 0 6px rgba(255, 111, 97, 0.8);
+  box-shadow: 0 0 6px rgba(255, 138, 76, 0.9);
 }
 
 .dock-btn:not(.on) span {
   filter: grayscale(0.9);
-  opacity: 0.55;
+  opacity: 0.45;
 }
