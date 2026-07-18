@@ -37,26 +37,31 @@ function makeGrid(w, d, step) {
 }
 
 export function buildRoom(scene, m) {
-  const { W, H, depth } = m;
+  const { W, H, depth, front } = m;
   const group = new THREE.Group();
+
+  // walls run from z = +front (behind the resting camera) to z = -depth, so
+  // the camera stays inside the box while flying — length L, centered at cz
+  const L = front + depth;
+  const cz = (front - depth) / 2;
 
   scene.fog = new THREE.Fog(C.bg, m.dist * 0.9, m.dist + depth * 1.35);
 
-  const floor = wall(W, depth, C.floor);
+  const floor = wall(W, L, C.floor);
   floor.rotation.x = -Math.PI / 2;
-  floor.position.set(0, -H / 2, -depth / 2);
+  floor.position.set(0, -H / 2, cz);
 
-  const ceiling = wall(W, depth, C.ceiling);
+  const ceiling = wall(W, L, C.ceiling);
   ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.set(0, H / 2, -depth / 2);
+  ceiling.position.set(0, H / 2, cz);
 
-  const left = wall(depth, H, C.wall);
+  const left = wall(L, H, C.wall);
   left.rotation.y = Math.PI / 2;
-  left.position.set(-W / 2, 0, -depth / 2);
+  left.position.set(-W / 2, 0, cz);
 
-  const right = wall(depth, H, C.wall);
+  const right = wall(L, H, C.wall);
   right.rotation.y = -Math.PI / 2;
-  right.position.set(W / 2, 0, -depth / 2);
+  right.position.set(W / 2, 0, cz);
 
   const back = wall(W, H, C.back);
   back.position.set(0, 0, -depth);
@@ -65,17 +70,15 @@ export function buildRoom(scene, m) {
 
   // glowing seams along every interior edge of the box
   const edges = new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(W, H, depth)),
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(W, H, L)),
     new THREE.LineBasicMaterial({ color: C.edge, transparent: true, opacity: 0.9 })
   );
-  // front edge ring sits a few px inside the opening, so a faint neon rim
-  // frames the portal during head movement instead of clipping at the border
-  edges.position.set(0, 0, -depth / 2 - 6);
+  edges.position.set(0, 0, cz);
   group.add(edges);
 
-  const grid = makeGrid(W, depth, Math.round(H / 9));
+  const grid = makeGrid(W, L, Math.round(H / 9));
   grid.rotation.x = -Math.PI / 2;
-  grid.position.set(0, -H / 2 + 1, -depth / 2);
+  grid.position.set(0, -H / 2 + 1, cz);
   group.add(grid);
 
   // slow-drifting dust motes for extra depth cues
@@ -84,7 +87,7 @@ export function buildRoom(scene, m) {
   for (let i = 0; i < COUNT; i++) {
     pos[i * 3] = (Math.random() - 0.5) * W * 0.9;
     pos[i * 3 + 1] = (Math.random() - 0.5) * H * 0.9;
-    pos[i * 3 + 2] = -Math.random() * depth;
+    pos[i * 3 + 2] = front - Math.random() * L;
   }
   const dustGeo = new THREE.BufferGeometry();
   dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
