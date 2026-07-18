@@ -1,8 +1,18 @@
 import { FilesetResolver, FaceLandmarker } from '@mediapipe/tasks-vision';
 import { stats } from '../ui/stats.js';
 
-const SENS = 3.5; // head moves a small fraction of the camera frame — amplify
+const SENS = 6; // lateral: head moves a small fraction of the camera frame
+const Z_SENS = 4; // lean-in: inter-eye distance ratio → depth
 const BASELINE_FRAMES = 12;
+
+// Detection runs on its own clock, decoupled from rendering: the render loop
+// interpolates at full display refresh (120Hz on ProMotion) while the
+// landmarker only pays its cost ~30 times a second — slower on weak devices.
+function detectInterval() {
+  if (stats.fps && stats.fps < 30) return 66;
+  if (stats.fps && stats.fps < 45) return 50;
+  return 33;
+}
 
 // Webcam head-tracking provider. All processing is local: frames go from the
 // camera straight into the WASM landmarker, nothing is recorded or uploaded.
@@ -36,53 +46,58 @@ export async function createFaceProvider() {
 
   let emit = null;
   let stopped = false;
-  let frame = 0;
+  let lastDetect = 0;
   let missed = 0;
   let baseline = null;
-  const baselineAcc = { x: 0, y: 0, n: 0 };
+  const acc = { x: 0, y: 0, eye: 0, n: 0 };
 
-  function loop() {
+  // distance between the outer eye corners — scale-invariant proxy for how
+  // close the head is to the screen (measured against the user's own baseline)
+  function eyeSpan(lm) {
+    return Math.hypot(lm[33].x - lm[263].x, lm[33].y - lm[263].y);
+  }
+
+  function loop(now) {
     if (stopped) return;
     requestAnimationFrame(loop);
-    frame += 1;
+    if (now - lastDetect < detectInterval() || video.readyState < 2) return;
+    lastDetect = now;
 
-    // FPS guard: detection is the expensive part — on slow devices run it
-    // every 2nd/3rd frame and let input smoothing hide the lower rate
-    const skip = stats.fps && stats.fps < 30 ? 3 : stats.fps && stats.fps < 45 ? 2 : 1;
-    if (frame % skip !== 0 || video.readyState < 2) return;
-
-    const result = landmarker.detectForVideo(video, performance.now());
+    const result = landmarker.detectForVideo(video, now);
     const lm = result.faceLandmarks?.[0];
     if (!lm) {
       // face lost for a while → drift back to center instead of sticking
-      if (++missed > 45) emit?.({ x: 0, y: 0 });
+      if (++missed > 20) emit?.({ x: 0, y: 0, z: 0 });
       return;
     }
     missed = 0;
     const nose = lm[1]; // nose tip
 
-    // calibrate to wherever the face naturally sits in frame on entry,
-    // so "rest position" means a centered camera
+    // calibrate to wherever the face naturally sits on entry, so the resting
+    // pose means a centered, unzoomed view
     if (!baseline) {
-      baselineAcc.x += nose.x;
-      baselineAcc.y += nose.y;
-      if (++baselineAcc.n >= BASELINE_FRAMES) {
-        baseline = { x: baselineAcc.x / baselineAcc.n, y: baselineAcc.y / baselineAcc.n };
+      acc.x += nose.x;
+      acc.y += nose.y;
+      acc.eye += eyeSpan(lm);
+      if (++acc.n >= BASELINE_FRAMES) {
+        baseline = { x: acc.x / acc.n, y: acc.y / acc.n, eye: acc.eye / acc.n };
       }
       return;
     }
 
-    // camera image is unmirrored: moving right/up decreases nose.x/nose.y
+    // camera image is unmirrored: moving right/up decreases nose.x/nose.y;
+    // leaning closer grows the eye span
     emit?.({
       x: (baseline.x - nose.x) * SENS,
       y: (baseline.y - nose.y) * SENS,
+      z: (eyeSpan(lm) / baseline.eye - 1) * Z_SENS,
     });
   }
 
   return {
     start(cb) {
       emit = cb;
-      loop();
+      requestAnimationFrame(loop);
     },
     stop() {
       stopped = true;

@@ -22,7 +22,10 @@ export function computeMetrics(target = {}) {
 export function updateCamera(camera, head, m, introOffset = 0) {
   const ex = head.x * m.W * 0.34;
   const ey = head.y * m.H * 0.3;
-  const ez = m.dist + introOffset;
+  // lean-in zoom: positive head.z dollies the eye toward (and through) the
+  // opening — combined with the off-axis shear this magnifies whatever wall
+  // the head is pointed at. The projection stays pinned for any eye distance.
+  const ez = Math.max(m.dist * 0.28, (m.dist + introOffset) * (1 - 0.42 * (head.z ?? 0)));
 
   camera.position.set(ex, ey, ez);
   // keep the z = 0 plane exactly viewport-sized even while the intro dollies
