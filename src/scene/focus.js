@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 
 const _euler = new THREE.Euler();
-const _mQuat = new THREE.Quaternion();
-const _mPos = new THREE.Vector3();
 
 // where a window sits when maximized: covering its own wall face, leaving a
 // thin gap so the glowing corner seams still show between walls
@@ -21,32 +19,6 @@ function wallTarget(def, m) {
       return { pos: [0, H / 2 - off, -depth / 2], rot: [Math.PI / 2, 0, 0], w: W - gap * 2, h: depth - gap * 2 };
     case 'bottom':
       return { pos: [0, -H / 2 + off, -depth / 2], rot: [-Math.PI / 2, 0, 0], w: W - gap * 2, h: depth - gap * 2 };
-  }
-}
-
-// "presented" pose: when the head turns toward a side wall, its window swings
-// partway off the wall to face the viewer and pulls toward center + closer, so
-// its text de-squashes and becomes readable. Front (back wall) never presents —
-// it already faces the viewer. Returns pose + how much the given head position
-// points toward this wall (0..1).
-const HINGE = 0.44; // fraction of the way from wall-flat toward facing the viewer
-function presentTarget(def, m, head) {
-  const { W, H, depth } = m;
-  const near = -depth * 0.24; // reading distance from the opening
-  const inset = 0.28;
-  // moving the head one way reveals the OPPOSITE wall (off-axis parallax), so
-  // that revealed wall's window is the one to swing forward and make readable
-  switch (def.wall) {
-    case 'left':
-      return { pos: [-W * inset, 0, near], rot: [0, (Math.PI / 2) * HINGE, 0], amt: Math.max(0, head.x) };
-    case 'right':
-      return { pos: [W * inset, 0, near], rot: [0, (-Math.PI / 2) * HINGE, 0], amt: Math.max(0, -head.x) };
-    case 'top':
-      return { pos: [0, H * inset, near], rot: [(Math.PI / 2) * HINGE, 0, 0], amt: Math.max(0, -head.y) };
-    case 'bottom':
-      return { pos: [0, -H * inset, near], rot: [(-Math.PI / 2) * HINGE, 0, 0], amt: Math.max(0, head.y) };
-    default:
-      return null; // back / front-facing
   }
 }
 
@@ -89,10 +61,6 @@ export function createFocus(panels, m) {
         target: prev?.target ?? 0,
         sized: prev?.sized ?? false,
         closed: prev?.closed ?? !!p.def.closed,
-        present: prev?.present ?? null,
-        presentPos: new THREE.Vector3(),
-        presentQuat: new THREE.Quaternion(),
-        pr: prev?.pr ?? 0,
       });
     }
   }
@@ -107,11 +75,6 @@ export function createFocus(panels, m) {
     st.max = wallTarget(p.def, m);
     st.maxPos.set(...st.max.pos);
     st.maxQuat.setFromEuler(_euler.set(...st.max.rot));
-    st.present = presentTarget(p.def, m, { x: 0, y: 0 });
-    if (st.present) {
-      st.presentPos.set(...st.present.pos);
-      st.presentQuat.setFromEuler(_euler.set(...st.present.rot));
-    }
     p.obj.element.style.width = `${Math.round(st.max.w)}px`;
     p.obj.element.style.height = `${Math.round(st.max.h)}px`;
     st.sized = true;
@@ -165,9 +128,8 @@ export function createFocus(panels, m) {
       }
     },
 
-    update(dt, head = { x: 0, y: 0 }) {
+    update(dt) {
       const k = 1 - Math.exp(-dt * 7);
-      const kp = 1 - Math.exp(-dt * 5);
       for (const p of panels) {
         const st = state.get(p);
         if (!st.sized) continue;
@@ -176,27 +138,13 @@ export function createFocus(panels, m) {
           sizeDown(p);
           continue;
         }
-
-        // maximize animation: home (floating) → wall-covering
-        _mPos.lerpVectors(st.homePos, st.maxPos, st.cur);
-        _mQuat.slerpQuaternions(st.homeQuat, st.maxQuat, st.cur);
-        let sx = THREE.MathUtils.lerp(st.baseW / st.max.w, 1, st.cur);
-        let sy = THREE.MathUtils.lerp(st.baseH / st.max.h, 1, st.cur);
-
-        // presentation: swing this wall's window toward the viewer by how much
-        // the head points at it (only while it's covering the wall)
-        if (st.present) {
-          const want = presentTarget(p.def, m, head).amt * st.cur;
-          st.pr += (want - st.pr) * kp;
-          if (st.pr > 0.001) {
-            _mPos.lerp(st.presentPos, st.pr);
-            _mQuat.slerp(st.presentQuat, st.pr);
-          }
-        }
-
-        p.obj.position.copy(_mPos);
-        p.obj.quaternion.copy(_mQuat);
-        p.obj.scale.set(sx, sy, 1);
+        p.obj.position.lerpVectors(st.homePos, st.maxPos, st.cur);
+        p.obj.quaternion.slerpQuaternions(st.homeQuat, st.maxQuat, st.cur);
+        p.obj.scale.set(
+          THREE.MathUtils.lerp(st.baseW / st.max.w, 1, st.cur),
+          THREE.MathUtils.lerp(st.baseH / st.max.h, 1, st.cur),
+          1
+        );
       }
     },
 
