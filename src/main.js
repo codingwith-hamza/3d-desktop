@@ -24,22 +24,25 @@ if (window.opener && (params.has('code') || params.has('error'))) {
   initLanding(() => {
     const input = createInput();
     const scene = createScene(document.getElementById('app'), input);
-    // the scene starts instantly on mouse parallax; head tracking swaps in
-    // behind the same input abstraction once the camera + model are ready
-    input.setProvider(mouseProvider());
+    // the scene starts instantly on mouse parallax; head tracking joins in
+    // as a second blended source once the camera + model are ready
+    const mouseSource = input.addSource(mouseProvider(), { xy: 1, z: 1 });
     stats.trackingMode = 'mouse';
     scene.start();
-    enableHeadTracking(input);
+    enableHeadTracking(input, mouseSource);
   });
 }
 
-async function enableHeadTracking(input) {
+async function enableHeadTracking(input, mouseSource) {
   try {
     // lazy-loaded so MediaPipe's WASM never blocks first paint
     const { createFaceProvider } = await import('./tracking/face.js');
     const provider = await createFaceProvider();
-    input.setProvider(provider);
-    stats.trackingMode = 'head';
+    // head becomes the main driver; the cursor keeps adding a gentle nudge
+    // (and the scroll wheel keeps full zoom authority) so both compose
+    input.addSource(provider, { xy: 1, z: 1 });
+    mouseSource.weights = { xy: 0.25, z: 1 };
+    stats.trackingMode = 'head + mouse';
     showHint('Move your head to look around');
   } catch (err) {
     console.warn('[tracking] using mouse parallax:', err?.message || err);

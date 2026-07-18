@@ -1,7 +1,7 @@
 import { stats } from '../ui/stats.js';
 
 const SENS = 6; // lateral: head moves a small fraction of the camera frame
-const Z_SENS = 4; // lean-in: inter-eye span ratio → depth
+const Z_SENS = 2.2; // lean-in: inter-eye span ratio → depth (kept gentle)
 const BASELINE_FRAMES = 12;
 
 // Detection cadence, decoupled from rendering: the landmarker (in its worker)

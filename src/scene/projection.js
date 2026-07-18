@@ -28,16 +28,16 @@ export function updateCamera(camera, head, m, introOffset = 0) {
   const ey = head.y * m.H * 0.3;
 
   // Lean-in = FLIGHT: the camera physically travels into the room, so
-  // approaching a wall magnifies it without limit — at full lean the eye is
-  // 82% of the way to the back wall (~10x). A dead zone keeps natural sway
-  // from pumping the motion; leaning back drifts toward the (extended) front.
+  // approaching a wall magnifies it — at full lean the eye is halfway to the
+  // back wall (~3x). A dead zone keeps natural sway from pumping the motion;
+  // leaning back drifts toward the (extended) front.
   const zRaw = head.z ?? 0;
-  const zIn = Math.max(0, zRaw - 0.12);
-  const zOut = Math.min(0, zRaw + 0.12);
-  const flight = (zIn / 1.18) * (m.dist + m.depth * 0.82);
+  const zIn = Math.max(0, zRaw - 0.15);
+  const zOut = Math.min(0, zRaw + 0.15);
+  const flight = (zIn / 1.15) * (m.dist + m.depth * 0.5);
   const cz = THREE.MathUtils.clamp(
     m.dist + introOffset - flight - zOut * m.dist * 0.3,
-    -m.depth * 0.82,
+    -m.depth * 0.5,
     m.front * 0.9
   );
 
