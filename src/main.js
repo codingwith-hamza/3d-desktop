@@ -43,7 +43,15 @@ async function enableHeadTracking(input, mouseSource) {
     input.addSource(provider, { xy: 1, z: 1 });
     mouseSource.weights = { xy: 0.25, z: 1 };
     stats.trackingMode = 'head + mouse';
-    showHint('Move your head to look around');
+    showHint('Move your head to look around · press R to recenter');
+
+    window.addEventListener('keydown', (e) => {
+      const typing = /^(INPUT|TEXTAREA)$/.test(e.target?.tagName) || e.target?.isContentEditable;
+      if (!typing && (e.key === 'r' || e.key === 'R')) {
+        provider.recenter();
+        showToast('Recentered — hold still a second');
+      }
+    });
   } catch (err) {
     console.warn('[tracking] using mouse parallax:', err?.message || err);
     stats.trackingMode = 'mouse';

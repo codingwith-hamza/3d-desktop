@@ -119,6 +119,14 @@ export async function createFaceProvider() {
       emit = cb;
       requestAnimationFrame(pump);
     },
+    // re-learn the resting pose (user shifted in their chair)
+    recenter() {
+      baseline = null;
+      acc.x = 0;
+      acc.y = 0;
+      acc.eye = 0;
+      acc.n = 0;
+    },
     stop() {
       stopped = true;
       worker.terminate();
