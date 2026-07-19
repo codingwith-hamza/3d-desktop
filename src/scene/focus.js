@@ -128,6 +128,15 @@ export function createFocus(panels, m) {
       }
     },
 
+    minimizeAll() {
+      for (const st of state.values()) st.target = 0;
+    },
+
+    // true when at least one open window is (or is becoming) wall-maximized
+    anyMaximized() {
+      return panels.some((p) => !state.get(p).closed && state.get(p).target === 1);
+    },
+
     update(dt) {
       const k = 1 - Math.exp(-dt * 7);
       for (const p of panels) {

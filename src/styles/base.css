@@ -226,3 +226,23 @@ body {
   filter: grayscale(0.9);
   opacity: 0.45;
 }
+
+.dock-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 4px;
+  background: rgba(255, 157, 92, 0.25);
+}
+
+.dock-all span {
+  filter: none;
+  opacity: 0.85;
+}
+
+.dock-all:hover span {
+  opacity: 1;
+}
+
+.dock-all i {
+  display: none;
+}
